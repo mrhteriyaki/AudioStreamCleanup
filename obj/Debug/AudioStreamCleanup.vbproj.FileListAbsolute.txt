@@ -1,0 +1,17 @@
+C:\Users\Mitchell\Source\Repos\AudioStreamCleanup\obj\Debug\AudioStreamCleanup.vbprojAssemblyReference.cache
+C:\Users\Mitchell\Source\Repos\AudioStreamCleanup\obj\Debug\AudioStreamCleanup.Form1.resources
+C:\Users\Mitchell\Source\Repos\AudioStreamCleanup\obj\Debug\AudioStreamCleanup.Resources.resources
+C:\Users\Mitchell\Source\Repos\AudioStreamCleanup\obj\Debug\AudioStreamCleanup.vbproj.GenerateResource.cache
+C:\Users\Mitchell\Source\Repos\AudioStreamCleanup\obj\Debug\AudioStreamCleanup.vbproj.CoreCompileInputs.cache
+C:\Users\Mitchell\Source\Repos\AudioStreamCleanup\bin\Debug\AudioStreamCleanup.exe.config
+C:\Users\Mitchell\Source\Repos\AudioStreamCleanup\bin\Debug\AudioStreamCleanup.exe
+C:\Users\Mitchell\Source\Repos\AudioStreamCleanup\bin\Debug\AudioStreamCleanup.pdb
+C:\Users\Mitchell\Source\Repos\AudioStreamCleanup\bin\Debug\AudioStreamCleanup.xml
+C:\Users\Mitchell\Source\Repos\AudioStreamCleanup\bin\Debug\Newtonsoft.Json.dll
+C:\Users\Mitchell\Source\Repos\AudioStreamCleanup\bin\Debug\Xabe.FFmpeg.dll
+C:\Users\Mitchell\Source\Repos\AudioStreamCleanup\bin\Debug\Newtonsoft.Json.xml
+C:\Users\Mitchell\Source\Repos\AudioStreamCleanup\bin\Debug\Xabe.FFmpeg.xml
+C:\Users\Mitchell\Source\Repos\AudioStreamCleanup\obj\Debug\AudioStreamCleanup.vbproj.CopyComplete
+C:\Users\Mitchell\Source\Repos\AudioStreamCleanup\obj\Debug\AudioStreamCleanup.exe
+C:\Users\Mitchell\Source\Repos\AudioStreamCleanup\obj\Debug\AudioStreamCleanup.xml
+C:\Users\Mitchell\Source\Repos\AudioStreamCleanup\obj\Debug\AudioStreamCleanup.pdb
