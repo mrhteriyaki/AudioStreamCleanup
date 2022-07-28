@@ -272,7 +272,9 @@ Public Class Form1
 
 
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-
+        If Not My.Computer.FileSystem.FileExists("C:\ffmpeg\bin\ffmpeg.exe") Then
+            MsgBox("Copy FFMPEG for Windows to C:\ffmpeg", MsgBoxStyle.Exclamation)
+        End If
     End Sub
 
     Public Sub InvokeControl(Of T As Control)(ByVal Control As T, ByVal Action As Action(Of T))

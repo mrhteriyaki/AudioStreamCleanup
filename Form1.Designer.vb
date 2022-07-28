@@ -62,7 +62,8 @@ Partial Class Form1
         '
         'btnProcess
         '
-        Me.btnProcess.Location = New System.Drawing.Point(1174, 11)
+        Me.btnProcess.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnProcess.Location = New System.Drawing.Point(836, 10)
         Me.btnProcess.Name = "btnProcess"
         Me.btnProcess.Size = New System.Drawing.Size(125, 23)
         Me.btnProcess.TabIndex = 3
@@ -71,7 +72,8 @@ Partial Class Form1
         '
         'btnCheckAll
         '
-        Me.btnCheckAll.Location = New System.Drawing.Point(1093, 11)
+        Me.btnCheckAll.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnCheckAll.Location = New System.Drawing.Point(755, 10)
         Me.btnCheckAll.Name = "btnCheckAll"
         Me.btnCheckAll.Size = New System.Drawing.Size(75, 23)
         Me.btnCheckAll.TabIndex = 4
@@ -80,7 +82,8 @@ Partial Class Form1
         '
         'btnCheckNone
         '
-        Me.btnCheckNone.Location = New System.Drawing.Point(1012, 11)
+        Me.btnCheckNone.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
+        Me.btnCheckNone.Location = New System.Drawing.Point(674, 10)
         Me.btnCheckNone.Name = "btnCheckNone"
         Me.btnCheckNone.Size = New System.Drawing.Size(75, 23)
         Me.btnCheckNone.TabIndex = 5
@@ -116,9 +119,12 @@ Partial Class Form1
         '
         'gbxMedia
         '
+        Me.gbxMedia.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left) _
+            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.gbxMedia.Location = New System.Drawing.Point(10, 52)
         Me.gbxMedia.Name = "gbxMedia"
-        Me.gbxMedia.Size = New System.Drawing.Size(1345, 797)
+        Me.gbxMedia.Size = New System.Drawing.Size(951, 57)
         Me.gbxMedia.TabIndex = 9
         Me.gbxMedia.TabStop = False
         Me.gbxMedia.Text = "Media Files"
@@ -127,7 +133,7 @@ Partial Class Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(1384, 861)
+        Me.ClientSize = New System.Drawing.Size(975, 124)
         Me.Controls.Add(Me.gbxMedia)
         Me.Controls.Add(Me.lblPage)
         Me.Controls.Add(Me.btnNextPage)
@@ -140,6 +146,7 @@ Partial Class Form1
         Me.Controls.Add(Me.btnScan)
         Me.Name = "Form1"
         Me.Text = "Form1"
+        Me.WindowState = System.Windows.Forms.FormWindowState.Maximized
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
