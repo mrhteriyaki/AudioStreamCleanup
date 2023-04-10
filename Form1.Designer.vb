@@ -58,7 +58,6 @@ Partial Class Form1
         Me.txtScanLocation.Name = "txtScanLocation"
         Me.txtScanLocation.Size = New System.Drawing.Size(320, 20)
         Me.txtScanLocation.TabIndex = 2
-        Me.txtScanLocation.Text = "G:\Videos\Movies\"
         '
         'btnProcess
         '
@@ -145,7 +144,7 @@ Partial Class Form1
         Me.Controls.Add(Me.lblStatus)
         Me.Controls.Add(Me.btnScan)
         Me.Name = "Form1"
-        Me.Text = "Form1"
+        Me.Text = "Audio Stream Cleanup Tool"
         Me.WindowState = System.Windows.Forms.FormWindowState.Maximized
         Me.ResumeLayout(False)
         Me.PerformLayout()
