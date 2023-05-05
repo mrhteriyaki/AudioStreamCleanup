@@ -1,6 +1,7 @@
 ﻿
 Imports Xabe.FFmpeg
 Imports System.Threading
+Imports System.IO
 
 Public Class Form1
     'Dim FileName As String
@@ -182,10 +183,18 @@ Public Class Form1
 
                     'if channel count matches, check for highest bitrate.
                 ElseIf AStream.Channels = channels Then
-                    If AStream.Bitrate > bitrate Then
+                    If AStream.Bitrate = 0 Then
+                        'Lossy - highest priority if channels match.
+                        ComBox.SelectedIndex = count
+                    ElseIf bitrate = 0 Then
+                        'existing track is lossy, skip compare.
+                        Continue For
+                    ElseIf AStream.Bitrate > bitrate Then
+                        'bitrate is higher.
                         bitrate = AStream.Bitrate
                         ComBox.SelectedIndex = count
                     End If
+
                 End If
             Next
 
@@ -305,6 +314,10 @@ Public Class Form1
         Next
 
         'Process List.
+        Dim ShowFFMPEG As Boolean = False
+        If MsgBox("Show FFMPEG Output?", MsgBoxStyle.YesNo) = MsgBoxResult.Yes Then
+            ShowFFMPEG = True
+        End If
 
         Dim Counter As Integer = 0
         For Each IndexInt In ProcessIndexList
@@ -321,8 +334,24 @@ Public Class Form1
                     Exit For
                 End If
                 tmpfilename = tmpfilename & splt & "."
-
             Next
+
+            'clear any previous tmpfile.
+            If My.Computer.FileSystem.FileExists(tmpfilename) Then
+                My.Computer.FileSystem.DeleteFile(tmpfilename)
+            End If
+            'test write access
+            Do Until My.Computer.FileSystem.FileExists(tmpfilename)
+                Try
+                    Dim TestWriteFile As New StreamWriter(tmpfilename)
+                    TestWriteFile.WriteLine("test")
+                    TestWriteFile.Close()
+                Catch ex As Exception
+                    MsgBox("Write access test to directory failed - check write access to: " & tmpfilename, MsgBoxStyle.Critical)
+                End Try
+            Loop
+            My.Computer.FileSystem.DeleteFile(tmpfilename)
+
 
 
             lblStatus.Text = "Status: Processing (" & Counter & "/" & ProcessIndexList.Count & ") " & MediaList(IndexInt).filename
@@ -334,8 +363,11 @@ Public Class Form1
             ConvertProcess.StartInfo.Arguments = "-i " & Chr(34) & MediaList(IndexInt).filename & Chr(34) & " -map 0:0 -c:v copy -map 0:" & MediaList(IndexInt).AudioStreams(AudioStreamIndex).Index & " -c:a copy -c:s copy " & Chr(34) & tmpfilename & Chr(34)
             ConvertProcess.StartInfo.WorkingDirectory = "C:\ffmpeg\bin"
 
-            'ConvertProcess.StartInfo.CreateNoWindow = True
-            'ConvertProcess.StartInfo.UseShellExecute = False
+            If ShowFFMPEG = False Then
+                ConvertProcess.StartInfo.UseShellExecute = False
+                ConvertProcess.StartInfo.CreateNoWindow = True
+            End If
+
             'ConvertProcess.StartInfo.RedirectStandardOutput = True
             'ConvertProcess.StartInfo.RedirectStandardError = True
             'AddHandler ConvertProcess.ErrorDataReceived, AddressOf ErrorInfo
