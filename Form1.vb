@@ -2,10 +2,21 @@
 Imports Xabe.FFmpeg
 Imports System.Threading
 Imports System.IO
+Imports System.Drawing.Imaging
 
 Public Class Form1
-    'Dim FileName As String
+
     Dim MediaList As New List(Of MediaFileStreamInfo)
+    Private Shared MediaListlockObject As New Object()
+
+    Dim MediaFileList As New List(Of String)
+
+    Dim ScanCount As Integer = 0
+    Private Shared ScanCountlockObject As New Object()
+    Dim ThreadComplete As Integer = 0
+
+    Dim threadcount As Integer = 4
+
 
     'Settings Registry.
     ReadOnly SettingsRegKey As String = "SOFTWARE\MRHSYSTEMS\AudioStreamCleanup"
@@ -37,6 +48,10 @@ Public Class Form1
         DefaultAudioStream.Clear()
         ComboBoxList.Clear()
         CheckBoxList.Clear()
+
+        gbxMedia.Controls.Clear()
+        lblPage.Text = "Page: 0/0"
+
     End Sub
 
     Sub ScanFolder()
@@ -79,54 +94,53 @@ Public Class Form1
 
 
 
-    Private Async Sub ScanFunction()
-        Dim MediaFileList As New List(Of String)
+    Private Sub ScanFunction()
+        MediaFileList.Clear()
+        ScanCount = 0
+        ThreadComplete = 0
+
         Dim Location As String = txtScanLocation.Text
 
         InvokeControl(lblStatus, Sub(x) x.Text = "Status: Indexing files")
         For Each MediaFile In My.Computer.FileSystem.GetFiles(Location, FileIO.SearchOption.SearchAllSubDirectories, {"*.avi", "*.mp4", "*.mkv"})
-            MediaFileList.Add(MediaFile)
-        Next
-
-        Dim Counter As Integer = 0
-        For Each MediaFile In MediaFileList
-            Counter += 1
             'Skip / Exclude QNAP Thumbs files.
             If MediaFile.Contains(".@__thumb") Then
                 Continue For
             End If
-
-            InvokeControl(lblStatus, Sub(x) x.Text = "Status: Scanning (" & Counter & "/" & MediaFileList.Count & ") " & MediaFile)
-
-            'Make list of files 
-            Try
-                Dim MediaInfo As IMediaInfo = Await FFmpeg.GetMediaInfo(MediaFile)
-                If MediaInfo.AudioStreams.Count > 1 Then
-                    Dim tmpMFSI As New MediaFileStreamInfo
-                    tmpMFSI.filename = MediaFile
-                    For Each AStream In MediaInfo.AudioStreams
-                        Dim tmpASInfo As New MediaFileStreamInfo.AudioStreamInfo
-                        tmpASInfo.Index = AStream.Index
-                        tmpASInfo.Codec = AStream.Codec
-                        tmpASInfo.Bitrate = AStream.Bitrate
-                        tmpASInfo.Channels = AStream.Channels
-                        tmpASInfo.Language = AStream.Language
-                        tmpMFSI.AudioStreams.Add(tmpASInfo)
-                    Next
-                    tmpMFSI.index = MediaList.Count + 1
-                    MediaList.Add(tmpMFSI)
-                End If
-            Catch ex As Exception
-                MsgBox("Unable to check stream information from:" & MediaFile, MsgBoxStyle.Critical)
-            End Try
+            MediaFileList.Add(MediaFile)
         Next
+
+        'Get Info from FFMPEG
+
+
+
+        'Make list of files 
+
+
+        Dim threads As New List(Of Thread)
+        Dim itemsPerThread As Integer = MediaFileList.Count \ threadcount
+        Dim remainingItems As Integer = MediaFileList.Count Mod threadcount
+
+        For i As Integer = 0 To threadcount - 1
+            Dim startIndex As Integer = i * itemsPerThread
+            Dim endIndex As Integer = If(i < threadcount - 1, startIndex + itemsPerThread - 1, startIndex + itemsPerThread + remainingItems - 1)
+
+            Dim t As New Thread(Sub() CheckFileInfoRange(startIndex, endIndex))
+            t.Start()
+            threads.Add(t)
+        Next
+
+        ' Wait for all threads to finish
+        Do Until ThreadComplete = threadcount
+            Threading.Thread.Sleep(100)
+        Loop
 
         InvokeControl(lblStatus, Sub(x) x.Text = "Status: Loading GUI controls.")
 
         'Generate Combobox for each media file for user to select primary audio track.
 
         Dim InitialHeight As Integer = ItemHeightCounter
-        Counter = 0
+        Dim Counter As Integer = 0
         For Each MFile In MediaList
 
             Dim TxtBox As New TextBox
@@ -230,6 +244,42 @@ Public Class Form1
 
         InvokeControl(lblStatus, Sub(x) x.Text = "Status: Scanning Complete")
         InvokeControl(btnScan, Sub(x) x.Enabled = True)
+    End Sub
+
+    Async Sub CheckFileInfoRange(ByVal startIndex As Integer, ByVal endIndex As Integer)
+        For i As Integer = startIndex To endIndex
+            Try
+                SyncLock ScanCountlockObject
+                    ScanCount += 1 'threadsafe increment
+                    InvokeControl(lblStatus, Sub(x) x.Text = "Status: Scanning (" & ScanCount & "/" & MediaFileList.Count & ")")
+                End SyncLock
+                Dim MediaInfo As IMediaInfo = Await FFmpeg.GetMediaInfo(MediaFileList(i))
+                If MediaInfo.AudioStreams.Count > 1 Then
+                    Dim tmpMFSI As New MediaFileStreamInfo
+                    tmpMFSI.filename = MediaFileList(i)
+                    For Each AStream In MediaInfo.AudioStreams
+                        Dim tmpASInfo As New MediaFileStreamInfo.AudioStreamInfo
+                        tmpASInfo.Index = AStream.Index
+                        tmpASInfo.Codec = AStream.Codec
+                        tmpASInfo.Bitrate = AStream.Bitrate
+                        tmpASInfo.Channels = AStream.Channels
+                        tmpASInfo.Language = AStream.Language
+                        tmpMFSI.AudioStreams.Add(tmpASInfo)
+                    Next
+                    tmpMFSI.index = MediaList.Count + 1
+                    SyncLock MediaListlockObject
+                        MediaList.Add(tmpMFSI)
+                    End SyncLock
+                End If
+            Catch ex As Exception
+                If MsgBox("Unable to check stream information from:" & MediaFileList(i) & " Retry?", MsgBoxStyle.Critical + MsgBoxStyle.YesNo) = MsgBoxResult.No Then
+                    Continue For
+                End If
+            End Try
+        Next
+
+        Interlocked.Increment(ThreadComplete) 'thread completed tracking.
+
     End Sub
 
 
@@ -430,6 +480,14 @@ Public Class Form1
         If Not SettingsKey Is Nothing Then
             My.Computer.Registry.CurrentUser.OpenSubKey(SettingsRegKey, True).SetValue("ScanPath", txtScanLocation.Text)
         End If
+    End Sub
+
+    Private Sub gbxMedia_Enter(sender As Object, e As EventArgs) Handles gbxMedia.Enter
+
+    End Sub
+
+    Private Sub txtThreads_TextChanged(sender As Object, e As EventArgs) Handles txtThreads.TextChanged
+        threadcount = Integer.Parse(txtThreads.Text)
     End Sub
 End Class
 

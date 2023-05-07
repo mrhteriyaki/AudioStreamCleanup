@@ -32,11 +32,14 @@ Partial Class Form1
         Me.btnNextPage = New System.Windows.Forms.Button()
         Me.lblPage = New System.Windows.Forms.Label()
         Me.gbxMedia = New System.Windows.Forms.GroupBox()
+        Me.txtThreads = New System.Windows.Forms.TextBox()
+        Me.Label1 = New System.Windows.Forms.Label()
+        Me.Label2 = New System.Windows.Forms.Label()
         Me.SuspendLayout()
         '
         'btnScan
         '
-        Me.btnScan.Location = New System.Drawing.Point(10, 10)
+        Me.btnScan.Location = New System.Drawing.Point(333, 12)
         Me.btnScan.Name = "btnScan"
         Me.btnScan.Size = New System.Drawing.Size(75, 23)
         Me.btnScan.TabIndex = 0
@@ -46,7 +49,7 @@ Partial Class Form1
         'lblStatus
         '
         Me.lblStatus.AutoSize = True
-        Me.lblStatus.Location = New System.Drawing.Point(7, 36)
+        Me.lblStatus.Location = New System.Drawing.Point(12, 64)
         Me.lblStatus.Name = "lblStatus"
         Me.lblStatus.Size = New System.Drawing.Size(40, 13)
         Me.lblStatus.TabIndex = 1
@@ -54,15 +57,15 @@ Partial Class Form1
         '
         'txtScanLocation
         '
-        Me.txtScanLocation.Location = New System.Drawing.Point(91, 13)
+        Me.txtScanLocation.Location = New System.Drawing.Point(50, 13)
         Me.txtScanLocation.Name = "txtScanLocation"
-        Me.txtScanLocation.Size = New System.Drawing.Size(320, 20)
+        Me.txtScanLocation.Size = New System.Drawing.Size(277, 20)
         Me.txtScanLocation.TabIndex = 2
         '
         'btnProcess
         '
         Me.btnProcess.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnProcess.Location = New System.Drawing.Point(836, 10)
+        Me.btnProcess.Location = New System.Drawing.Point(1398, 10)
         Me.btnProcess.Name = "btnProcess"
         Me.btnProcess.Size = New System.Drawing.Size(125, 23)
         Me.btnProcess.TabIndex = 3
@@ -72,7 +75,7 @@ Partial Class Form1
         'btnCheckAll
         '
         Me.btnCheckAll.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnCheckAll.Location = New System.Drawing.Point(755, 10)
+        Me.btnCheckAll.Location = New System.Drawing.Point(1317, 10)
         Me.btnCheckAll.Name = "btnCheckAll"
         Me.btnCheckAll.Size = New System.Drawing.Size(75, 23)
         Me.btnCheckAll.TabIndex = 4
@@ -82,7 +85,7 @@ Partial Class Form1
         'btnCheckNone
         '
         Me.btnCheckNone.Anchor = CType((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.btnCheckNone.Location = New System.Drawing.Point(674, 10)
+        Me.btnCheckNone.Location = New System.Drawing.Point(1236, 10)
         Me.btnCheckNone.Name = "btnCheckNone"
         Me.btnCheckNone.Size = New System.Drawing.Size(75, 23)
         Me.btnCheckNone.TabIndex = 5
@@ -121,18 +124,47 @@ Partial Class Form1
         Me.gbxMedia.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.gbxMedia.Location = New System.Drawing.Point(10, 52)
+        Me.gbxMedia.Location = New System.Drawing.Point(10, 85)
         Me.gbxMedia.Name = "gbxMedia"
-        Me.gbxMedia.Size = New System.Drawing.Size(951, 57)
+        Me.gbxMedia.Size = New System.Drawing.Size(1513, 73)
         Me.gbxMedia.TabIndex = 9
         Me.gbxMedia.TabStop = False
         Me.gbxMedia.Text = "Media Files"
+        '
+        'txtThreads
+        '
+        Me.txtThreads.Location = New System.Drawing.Point(91, 39)
+        Me.txtThreads.Name = "txtThreads"
+        Me.txtThreads.Size = New System.Drawing.Size(46, 20)
+        Me.txtThreads.TabIndex = 10
+        Me.txtThreads.Text = "4"
+        '
+        'Label1
+        '
+        Me.Label1.AutoSize = True
+        Me.Label1.Location = New System.Drawing.Point(12, 42)
+        Me.Label1.Name = "Label1"
+        Me.Label1.Size = New System.Drawing.Size(77, 13)
+        Me.Label1.TabIndex = 11
+        Me.Label1.Text = "Scan Threads:"
+        '
+        'Label2
+        '
+        Me.Label2.AutoSize = True
+        Me.Label2.Location = New System.Drawing.Point(12, 16)
+        Me.Label2.Name = "Label2"
+        Me.Label2.Size = New System.Drawing.Size(32, 13)
+        Me.Label2.TabIndex = 12
+        Me.Label2.Text = "Path:"
         '
         'Form1
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(975, 124)
+        Me.ClientSize = New System.Drawing.Size(1537, 173)
+        Me.Controls.Add(Me.Label2)
+        Me.Controls.Add(Me.Label1)
+        Me.Controls.Add(Me.txtThreads)
         Me.Controls.Add(Me.gbxMedia)
         Me.Controls.Add(Me.lblPage)
         Me.Controls.Add(Me.btnNextPage)
@@ -161,4 +193,7 @@ Partial Class Form1
     Friend WithEvents btnNextPage As Button
     Friend WithEvents lblPage As Label
     Friend WithEvents gbxMedia As GroupBox
+    Friend WithEvents txtThreads As TextBox
+    Friend WithEvents Label1 As Label
+    Friend WithEvents Label2 As Label
 End Class
