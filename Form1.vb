@@ -3,6 +3,7 @@ Imports Xabe.FFmpeg
 Imports System.Threading
 Imports System.IO
 Imports System.Drawing.Imaging
+Imports Microsoft.VisualBasic.ApplicationServices
 
 Public Class Form1
 
@@ -14,9 +15,8 @@ Public Class Form1
     Dim ScanCount As Integer = 0
     Private Shared ScanCountlockObject As New Object()
     Dim ThreadComplete As Integer = 0
-
     Dim threadcount As Integer = 4
-
+    Dim ScanFunctionThread As New Thread(AddressOf ScanFunction)
 
     'Settings Registry.
     ReadOnly SettingsRegKey As String = "SOFTWARE\MRHSYSTEMS\AudioStreamCleanup"
@@ -62,7 +62,7 @@ Public Class Form1
             txtScanLocation.Text = txtScanLocation.Text & "\"
         End If
 
-        Dim ScanFunctionThread As New Thread(AddressOf ScanFunction)
+        ScanFunctionThread = New Thread(AddressOf ScanFunction)
         ScanFunctionThread.Start()
 
     End Sub
@@ -102,13 +102,22 @@ Public Class Form1
         Dim Location As String = txtScanLocation.Text
 
         InvokeControl(lblStatus, Sub(x) x.Text = "Status: Indexing files")
-        For Each MediaFile In My.Computer.FileSystem.GetFiles(Location, FileIO.SearchOption.SearchAllSubDirectories, {"*.avi", "*.mp4", "*.mkv"})
-            'Skip / Exclude QNAP Thumbs files.
-            If MediaFile.Contains(".@__thumb") Then
-                Continue For
-            End If
-            MediaFileList.Add(MediaFile)
-        Next
+        Dim lastfile As String = ""
+        Try
+
+            For Each MediaFile In My.Computer.FileSystem.GetFiles(Location, FileIO.SearchOption.SearchAllSubDirectories, {"*.avi", "*.mp4", "*.mkv"})
+                lastfile = MediaFile
+                'Skip / Exclude QNAP Thumbs files.
+                If MediaFile.Contains(".@__thumb") Then
+                    Continue For
+                End If
+                MediaFileList.Add(MediaFile)
+            Next
+
+        Catch ex As Exception
+            MsgBox("Failed to get file index on folder: " & Location & Environment.NewLine & "Last file checked:" & lastfile & Environment.NewLine & "Recommend checking for inaccessible directoriese / corrupt file system." & Environment.NewLine & "Exception: " & ex.ToString)
+            Exit Sub
+        End Try
 
         'Get Info from FFMPEG
 
@@ -117,17 +126,14 @@ Public Class Form1
         'Make list of files 
 
 
-        Dim threads As New List(Of Thread)
         Dim itemsPerThread As Integer = MediaFileList.Count \ threadcount
         Dim remainingItems As Integer = MediaFileList.Count Mod threadcount
-
+        'Slit up file list by thread count, assign ranges to threads.
         For i As Integer = 0 To threadcount - 1
             Dim startIndex As Integer = i * itemsPerThread
             Dim endIndex As Integer = If(i < threadcount - 1, startIndex + itemsPerThread - 1, startIndex + itemsPerThread + remainingItems - 1)
-
             Dim t As New Thread(Sub() CheckFileInfoRange(startIndex, endIndex))
             t.Start()
-            threads.Add(t)
         Next
 
         ' Wait for all threads to finish
@@ -253,7 +259,9 @@ Public Class Form1
                     ScanCount += 1 'threadsafe increment
                     InvokeControl(lblStatus, Sub(x) x.Text = "Status: Scanning (" & ScanCount & "/" & MediaFileList.Count & ")")
                 End SyncLock
+
                 Dim MediaInfo As IMediaInfo = Await FFmpeg.GetMediaInfo(MediaFileList(i))
+
                 If MediaInfo.AudioStreams.Count > 1 Then
                     Dim tmpMFSI As New MediaFileStreamInfo
                     tmpMFSI.filename = MediaFileList(i)
@@ -272,7 +280,9 @@ Public Class Form1
                     End SyncLock
                 End If
             Catch ex As Exception
-                If MsgBox("Unable to check stream information from:" & MediaFileList(i) & " Retry?", MsgBoxStyle.Critical + MsgBoxStyle.YesNo) = MsgBoxResult.No Then
+                'FFMPEG Unable to probe file for information.
+                'Exception has occured on older versions of ffmpeg.
+                If MsgBox("Unable to check stream information from:" & MediaFileList(i) & Environment.NewLine & "Recommend updating FFMPEG" & " Retry?", MsgBoxStyle.Critical + MsgBoxStyle.YesNo) = MsgBoxResult.No Then
                     Continue For
                 End If
             End Try
@@ -397,7 +407,7 @@ Public Class Form1
                     TestWriteFile.WriteLine("test")
                     TestWriteFile.Close()
                 Catch ex As Exception
-                    MsgBox("Write access test to directory failed - check write access to: " & tmpfilename, MsgBoxStyle.Critical)
+                    MsgBox("Write access test to directory failed - check write access and click OK to retry." & tmpfilename, MsgBoxStyle.OkOnly)
                 End Try
             Loop
             My.Computer.FileSystem.DeleteFile(tmpfilename)
@@ -488,6 +498,13 @@ Public Class Form1
 
     Private Sub txtThreads_TextChanged(sender As Object, e As EventArgs) Handles txtThreads.TextChanged
         threadcount = Integer.Parse(txtThreads.Text)
+    End Sub
+
+    Private Sub Form1_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
+        If ScanFunctionThread.IsAlive Then
+            ScanFunctionThread.Abort()
+        End If
+
     End Sub
 End Class
 

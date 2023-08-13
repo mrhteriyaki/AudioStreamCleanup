@@ -51,7 +51,7 @@ Partial Class Form1
         Me.lblStatus.AutoSize = True
         Me.lblStatus.Location = New System.Drawing.Point(12, 64)
         Me.lblStatus.Name = "lblStatus"
-        Me.lblStatus.Size = New System.Drawing.Size(40, 13)
+        Me.lblStatus.Size = New System.Drawing.Size(44, 15)
         Me.lblStatus.TabIndex = 1
         Me.lblStatus.Text = "Status:"
         '
@@ -115,7 +115,7 @@ Partial Class Form1
         Me.lblPage.AutoSize = True
         Me.lblPage.Location = New System.Drawing.Point(604, 15)
         Me.lblPage.Name = "lblPage"
-        Me.lblPage.Size = New System.Drawing.Size(55, 13)
+        Me.lblPage.Size = New System.Drawing.Size(59, 15)
         Me.lblPage.TabIndex = 8
         Me.lblPage.Text = "Page: 0/0"
         '
@@ -133,7 +133,7 @@ Partial Class Form1
         '
         'txtThreads
         '
-        Me.txtThreads.Location = New System.Drawing.Point(91, 39)
+        Me.txtThreads.Location = New System.Drawing.Point(99, 39)
         Me.txtThreads.Name = "txtThreads"
         Me.txtThreads.Size = New System.Drawing.Size(46, 20)
         Me.txtThreads.TabIndex = 10
@@ -144,7 +144,7 @@ Partial Class Form1
         Me.Label1.AutoSize = True
         Me.Label1.Location = New System.Drawing.Point(12, 42)
         Me.Label1.Name = "Label1"
-        Me.Label1.Size = New System.Drawing.Size(77, 13)
+        Me.Label1.Size = New System.Drawing.Size(86, 15)
         Me.Label1.TabIndex = 11
         Me.Label1.Text = "Scan Threads:"
         '
@@ -153,7 +153,7 @@ Partial Class Form1
         Me.Label2.AutoSize = True
         Me.Label2.Location = New System.Drawing.Point(12, 16)
         Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(32, 13)
+        Me.Label2.Size = New System.Drawing.Size(35, 15)
         Me.Label2.TabIndex = 12
         Me.Label2.Text = "Path:"
         '
