@@ -115,7 +115,7 @@ Public Class Form1
             Next
 
         Catch ex As Exception
-            MsgBox("Failed to get file index on folder: " & Location & Environment.NewLine & "Last file checked:" & lastfile & Environment.NewLine & "Recommend checking for inaccessible directoriese / corrupt file system." & Environment.NewLine & "Exception: " & ex.ToString)
+            MsgBox("Failed to get file index on folder: " & Location & Environment.NewLine & "Last file checked:" & lastfile & Environment.NewLine & "Recommend checking for inaccessible directoriese / corrupt file system." & Environment.NewLine & "Exception: " & ex.ToString, MsgBoxStyle.Exclamation)
             Exit Sub
         End Try
 
@@ -260,6 +260,10 @@ Public Class Form1
                     InvokeControl(lblStatus, Sub(x) x.Text = "Status: Scanning (" & ScanCount & "/" & MediaFileList.Count & ")")
                 End SyncLock
 
+                If Not My.Computer.FileSystem.FileExists(MediaFileList(i)) Then
+                    'File Deleted since initial scan, skip.
+                    Continue For
+                End If
                 Dim MediaInfo As IMediaInfo = Await FFmpeg.GetMediaInfo(MediaFileList(i))
 
                 If MediaInfo.AudioStreams.Count > 1 Then
