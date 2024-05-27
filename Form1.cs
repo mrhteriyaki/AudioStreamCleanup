@@ -124,13 +124,15 @@ namespace AudioStreamCleanup
             ThreadComplete = 0;
 
             string Location = txtScanLocation.Text;
+            string[] fileTypes = new[] { "*.avi", "*.mp4", "*.mkv" };
+
 
             InvokeControl(lblStatus, x => x.Text = "Status: Indexing files");
             string lastfile = "";
             try
             {
-
-                foreach (var MediaFile in My.MyProject.Computer.FileSystem.GetFiles(Location, Microsoft.VisualBasic.FileIO.SearchOption.SearchAllSubDirectories, new[] { "*.avi", "*.mp4", "*.mkv" }))
+                
+                foreach (string MediaFile in Directory.GetFiles(Location,"*"))
                 {
                     lastfile = MediaFile;
                     // Skip / Exclude QNAP Thumbs files.
@@ -138,7 +140,14 @@ namespace AudioStreamCleanup
                     {
                         continue;
                     }
-                    MediaFileList.Add(MediaFile);
+                    foreach(string vFT in fileTypes)
+                    {
+                        if (Path.GetExtension(MediaFile).Equals(vFT))
+                        {
+                            MediaFileList.Add(MediaFile);
+                            break;
+                        }
+                    }                   
                 }
             }
 
@@ -358,7 +367,7 @@ namespace AudioStreamCleanup
                 MessageBox.Show(@"Copy FFMPEG for Windows to C:\ffmpeg", "FFMPEG Error");
             }
 
-            My.MyProject.Computer.Registry.CurrentUser.CreateSubKey(SettingsRegKey);
+            //My.MyProject.Computer.Registry.CurrentUser.CreateSubKey(SettingsRegKey);
             
             //Set path from last usage in registry. //disabled after vb convert.
             //string LastPath = My.MyProject.Computer.Registry.CurrentUser.OpenSubKey(SettingsRegKey, true).GetValue("ScanPath", @"C:\Movies\");
@@ -540,8 +549,8 @@ namespace AudioStreamCleanup
                 if ((ValidateFileInfo.AudioStreams.ElementAtOrDefault(0).Codec ?? "") == (MediaList[IndexInt].AudioStreams[AudioStreamIndex].Codec ?? ""))
                 {
                     // rename existing file to .old ext
-                    My.MyProject.Computer.FileSystem.MoveFile(MediaList[IndexInt].filename, MediaList[IndexInt].filename + ".old");
-                    My.MyProject.Computer.FileSystem.MoveFile(tmpfilename, MediaList[IndexInt].filename);
+                    File.Move(MediaList[IndexInt].filename, MediaList[IndexInt].filename + ".old");
+                    File.Move(tmpfilename, MediaList[IndexInt].filename);
                     string oldfile = MediaList[IndexInt].filename + ".old";
                     while (File.Exists(oldfile))
                     {
@@ -584,11 +593,13 @@ namespace AudioStreamCleanup
 
         private void txtScanLocation_TextChanged(object sender, EventArgs e)
         {
+            /*
             var SettingsKey = My.MyProject.Computer.Registry.CurrentUser.OpenSubKey(SettingsRegKey, true);
             if (SettingsKey is not null)
             {
                 My.MyProject.Computer.Registry.CurrentUser.OpenSubKey(SettingsRegKey, true).SetValue("ScanPath", txtScanLocation.Text);
             }
+            */
         }
 
         private void gbxMedia_Enter(object sender, EventArgs e)
