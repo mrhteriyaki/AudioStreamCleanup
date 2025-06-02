@@ -10,6 +10,7 @@ using System.Windows.Forms;
 
 
 using Xabe.FFmpeg;
+using static AudioStreamCleanup.MediaFileStreamInfo;
 
 namespace AudioStreamCleanup
 {
@@ -29,7 +30,7 @@ namespace AudioStreamCleanup
         private Thread ScanFunctionThread;
 
         // Settings Registry.
-        private readonly string SettingsRegKey = @"SOFTWARE\MRHSYSTEMS\AudioStreamCleanup";
+        //private readonly string SettingsRegKey = @"SOFTWARE\MRHSYSTEMS\AudioStreamCleanup";
 
         // Page properties.
         private int ItemHeightCounter;
@@ -114,9 +115,6 @@ namespace AudioStreamCleanup
 
         }
 
-
-
-
         private void ScanFunction()
         {
             MediaFileList.Clear();
@@ -124,15 +122,14 @@ namespace AudioStreamCleanup
             ThreadComplete = 0;
 
             string Location = txtScanLocation.Text;
-            string[] fileTypes = new[] { "*.avi", "*.mp4", "*.mkv" };
+            string[] fileTypes = [".avi", ".mp4", ".mkv"];
 
 
             InvokeControl(lblStatus, x => x.Text = "Status: Indexing files");
             string lastfile = "";
             try
             {
-                
-                foreach (string MediaFile in Directory.GetFiles(Location,"*"))
+                foreach (string MediaFile in Directory.GetFiles(Location, "*", SearchOption.AllDirectories))
                 {
                     lastfile = MediaFile;
                     // Skip / Exclude QNAP Thumbs files.
@@ -140,44 +137,54 @@ namespace AudioStreamCleanup
                     {
                         continue;
                     }
-                    foreach(string vFT in fileTypes)
+                    foreach (string vFT in fileTypes)
                     {
                         if (Path.GetExtension(MediaFile).Equals(vFT))
                         {
                             MediaFileList.Add(MediaFile);
                             break;
                         }
-                    }                   
+                    }
                 }
             }
-
             catch (Exception ex)
             {
-                MessageBox.Show("Failed to get file index on folder: " + Location + Environment.NewLine + "Last file checked:" + lastfile + Environment.NewLine + "Recommend checking for inaccessible directoriese / corrupt file system." + Environment.NewLine + "Exception: " + ex.ToString(),"Error",MessageBoxButtons.OK,MessageBoxIcon.Error);
+                MessageBox.Show("Failed to get file index on folder: " + Location + Environment.NewLine + "Last file checked:" + lastfile + Environment.NewLine + "Recommend checking for inaccessible directoriese / corrupt file system." + Environment.NewLine + "Exception: " + ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             // Get Info from FFMPEG
-
-
+            
 
             // Make list of files 
 
 
             int itemsPerThread = MediaFileList.Count / threadcount;
             int remainingItems = MediaFileList.Count % threadcount;
+            List<Thread> scanningThreads = new List<Thread>();
             // Slit up file list by thread count, assign ranges to threads.
             for (int i = 0, loopTo = threadcount - 1; i <= loopTo; i++)
             {
                 int startIndex = i * itemsPerThread;
                 int endIndex = i < threadcount - 1 ? startIndex + itemsPerThread - 1 : startIndex + itemsPerThread + remainingItems - 1;
-                var t = new Thread(() => CheckFileInfoRange(startIndex, endIndex));
+
+
+                Thread t = new Thread(() => CheckFileInfoRange(startIndex, endIndex));
                 t.Start();
+                scanningThreads.Add(t);
             }
 
             // Wait for all threads to finish
+            foreach (Thread t in scanningThreads)
+            {
+                t.Join();
+            }
+
             while (ThreadComplete != threadcount)
+            {
                 Thread.Sleep(100);
+            }
+
 
             InvokeControl(lblStatus, x => x.Text = "Status: Loading GUI controls.");
 
@@ -326,11 +333,11 @@ namespace AudioStreamCleanup
 
                     if (MediaInfo.AudioStreams.Count() > 1)
                     {
-                        var tmpMFSI = new MediaFileStreamInfo();
+                        MediaFileStreamInfo tmpMFSI = new MediaFileStreamInfo();
                         tmpMFSI.filename = MediaFileList[i];
                         foreach (var AStream in MediaInfo.AudioStreams)
                         {
-                            var tmpASInfo = new MediaFileStreamInfo.AudioStreamInfo();
+                            AudioStreamInfo tmpASInfo = new MediaFileStreamInfo.AudioStreamInfo();
                             tmpASInfo.Index = AStream.Index;
                             tmpASInfo.Codec = AStream.Codec;
                             tmpASInfo.Bitrate = AStream.Bitrate;
@@ -340,14 +347,17 @@ namespace AudioStreamCleanup
                         }
                         tmpMFSI.index = MediaList.Count + 1;
                         lock (MediaListlockObject)
+                        {
                             MediaList.Add(tmpMFSI);
+                        }
+                            
                     }
                 }
                 catch (Exception ex)
                 {
                     // FFMPEG Unable to probe file for information.
                     // Exception has occured on older versions of ffmpeg.
-                    if (MessageBox.Show("Unable to check stream information from:" + MediaFileList[i] + Environment.NewLine + "Recommend updating FFMPEG" + " Retry?", "Error",MessageBoxButtons.YesNo,MessageBoxIcon.Warning) == DialogResult.No)
+                    if (MessageBox.Show("Unable to check stream information from:" + MediaFileList[i] + Environment.NewLine + "Recommend updating FFMPEG" + " Retry?", "Error", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.No)
                     {
                         continue;
                     }
@@ -368,7 +378,7 @@ namespace AudioStreamCleanup
             }
 
             //My.MyProject.Computer.Registry.CurrentUser.CreateSubKey(SettingsRegKey);
-            
+
             //Set path from last usage in registry. //disabled after vb convert.
             //string LastPath = My.MyProject.Computer.Registry.CurrentUser.OpenSubKey(SettingsRegKey, true).GetValue("ScanPath", @"C:\Movies\");
             //txtScanLocation.Text = LastPath;
@@ -462,7 +472,7 @@ namespace AudioStreamCleanup
 
             // Process List.
             bool ShowFFMPEG = false;
-            if (MessageBox.Show("Show FFMPEG Output?", "Show FFMPEG",MessageBoxButtons.YesNo) == DialogResult.Yes)
+            if (MessageBox.Show("Show FFMPEG Output?", "Show FFMPEG", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
                 ShowFFMPEG = true;
             }
@@ -472,20 +482,19 @@ namespace AudioStreamCleanup
             {
                 Counter += 1;
                 int AudioStreamIndex = ComboBoxList[IndexInt].SelectedIndex;
-
-                string tmpfilename = "";
-                string[] splitext = MediaList[IndexInt].filename.Split('.');
-                int count = 0;
-                foreach (var splt in splitext)
+               
+                string original = MediaList[IndexInt].filename;
+                if(original.ToLower().Contains(".tmp."))
                 {
-                    count += 1;
-                    if (count == splitext.Length)
-                    {
-                        tmpfilename = tmpfilename + "tmp." + splt;
-                        break;
-                    }
-                    tmpfilename = tmpfilename + splt + ".";
+                    MessageBox.Show("Temp file detected in list - Skipping.");
+                    continue;
                 }
+
+                string withoutExt = Path.Combine(Path.GetDirectoryName(original) ?? "", Path.GetFileNameWithoutExtension(original));
+                string ext = Path.GetExtension(original);
+                string tmpfilename = withoutExt + ".tmp" + ext;
+
+               
 
                 // clear any previous tmpfile.
                 if (File.Exists(tmpfilename))
@@ -600,6 +609,7 @@ namespace AudioStreamCleanup
                 My.MyProject.Computer.Registry.CurrentUser.OpenSubKey(SettingsRegKey, true).SetValue("ScanPath", txtScanLocation.Text);
             }
             */
+
         }
 
         private void gbxMedia_Enter(object sender, EventArgs e)
